@@ -8,6 +8,7 @@ import { Login } from "./pages/Login";
 import { MyNetworks } from "./pages/MyNetworks";
 import { SplashScreen } from "./pages/SplashScreen";
 import { getUserById } from "./reducer/auth";
+import { SiteHeader } from "./components/site-header";
 
 function App() {
   const dispatch = useAppDispatach();
@@ -30,16 +31,19 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/home" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<AuthGuard />}>
-          <Route index element={<MyNetworks />} />
-          <Route path="/my-networks" element={<MyNetworks />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <div className="relative flex min-h-screen flex-col">
+      <SiteHeader />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<AuthGuard />}>
+            <Route index element={<MyNetworks />} />
+            <Route path="/my-networks" element={<MyNetworks />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </div>
   )
 }
 
