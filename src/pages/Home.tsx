@@ -1,13 +1,15 @@
 import { getRedirectResult, GithubAuthProvider, signInWithRedirect } from "firebase/auth";
+import { useEffect } from "react";
 import { GITUHB } from "../assets";
 import { auth } from "../firebase";
-import { useEffect } from "react";
+import { useAppDispatach } from "../hooks/useRedux";
 import { IUser } from "../interfaces";
-import { authApi } from "../api/auth";
+import { createUser } from "../reducer/auth";
 
 export function Home() {
   const provider = new GithubAuthProvider();
   provider.addScope('read:user');
+  const dispatch = useAppDispatach();
 
   function login() {
     signInWithRedirect(auth, provider);
@@ -27,8 +29,7 @@ export function Home() {
           createdAt: new Date().toDateString(),
           lastLoginAt: new Date().toDateString(),
         }
-        authApi.createUser(newUser);
-        // ...
+        dispatch(createUser(newUser));
       }).catch((error) => {
         console.error(error);
         // Handle Errors here.

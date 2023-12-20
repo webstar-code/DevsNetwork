@@ -1,13 +1,17 @@
 import { getRedirectResult, GithubAuthProvider, signInWithRedirect } from "firebase/auth";
+import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { GITUHB } from "../assets";
 import { auth } from "../firebase";
-import { useEffect } from "react";
+import { useAppDispatach, useAppSelector } from "../hooks/useRedux";
 import { IUser } from "../interfaces";
-import { authApi } from "../api/auth";
+import { createUser } from "../reducer/auth";
 
 export function Login() {
   const provider = new GithubAuthProvider();
   provider.addScope('read:user');
+  const { user } = useAppSelector(state => state.userSlice);
+  const dispatch = useAppDispatach();
 
   function login() {
     signInWithRedirect(auth, provider);
@@ -27,8 +31,7 @@ export function Login() {
           createdAt: new Date().toDateString(),
           lastLoginAt: new Date().toDateString(),
         }
-        authApi.createUser(newUser);
-        // ...
+        dispatch(createUser(newUser));
       }).catch((error) => {
         console.error(error);
         // Handle Errors here.
@@ -42,6 +45,7 @@ export function Login() {
       });
   }, []);
 
+  if (user) return <Navigate to="/" />
 
   return (
     <div className="w-full min-h-screen bg-primary flex flex-col items-center justify-center gap-10">

@@ -15,7 +15,7 @@ const initialState: IInitialState = {
   loading: false
 };
 
-export const createCustomer = createAsyncThunk(
+export const createUser = createAsyncThunk(
   'user/create',
   async (newUser: IUser, { fulfillWithValue, rejectWithValue }) => {
     const res = await authApi.createUser(newUser);
@@ -53,10 +53,10 @@ const userSlice = createSlice({
   initialState: initialState,
   reducers: {},
   extraReducers(builder) {
-    builder.addCase(createCustomer.rejected, (state) => {
+    builder.addCase(createUser.rejected, (state) => {
       return { ...state, loading: true };
     });
-    builder.addCase(createCustomer.pending, (state) => {
+    builder.addCase(createUser.pending, (state) => {
       return { ...state, loading: true };
     });
     builder.addCase(getUserById.rejected, (state) => {
@@ -66,7 +66,7 @@ const userSlice = createSlice({
       return { ...state, loading: true };
     });
     builder.addCase(getUserById.fulfilled, (state, action: any) => {
-      return { ...state, customer: action.payload, loading: false };
+      return { ...state, user: action.payload, loading: false };
     });
 
     builder.addCase(logout.rejected, (state) => {
@@ -76,7 +76,7 @@ const userSlice = createSlice({
       return { ...state, loading: true };
     });
     builder.addCase(logout.fulfilled, (state) => {
-      return { ...state, customer: null, loading: false };
+      return { ...state, user: null, loading: false };
     });
   }
 })
