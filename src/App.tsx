@@ -1,16 +1,52 @@
-import { GITUHB } from "./assets"
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { auth } from "./firebase";
+import { useAppDispatach, useAppSelector } from "./hooks/useRedux";
+import { Home } from "./pages/Home";
+import { Login } from "./pages/Login";
+import { MyNetworks } from "./pages/MyNetworks";
+import { SplashScreen } from "./pages/SplashScreen";
+import { getUserById } from "./reducer/auth";
 
 function App() {
+  const dispatch = useAppDispatach();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await dispatch(getUserById(user.uid));
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <SplashScreen />;
+  }
+
   return (
-    <div className="w-full min-h-screen bg-primary flex flex-col items-center justify-center gap-10">
-      <h1 className='text-secondary text-7xl font-bold'>DEVsNetwork</h1>
-      <p className='text-base text-secondary'>Start creating your network by logging in below</p>
-      <div className="w-full max-w-[320px] h-10 bg-primary border rounded-md flex items-center justify-center cursor-pointer">
-        <p className="text-base text-primary-foreground mr-2">Login with GitHub</p>
-        <img src={GITUHB} className="w-6 h-5" />
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/home" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<AuthGuard />}>
+          <Route index element={<MyNetworks />} />
+          <Route path="/my-networks" element={<MyNetworks />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
+}
+
+export const AuthGuard = () => {
+  const { user } = useAppSelector(state => state.userSlice);
+  if (!user) return <Navigate to="/login" />
+  return <Outlet />
 }
 
 export default App
