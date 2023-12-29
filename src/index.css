@@ -10,6 +10,11 @@ body {
   box-sizing: border-box;
 }
 
+.vis-network {
+  width: 100%;
+  height: 600px;
+}
+
 @media (max-width: 640px) {
   .container {
     @apply px-4;

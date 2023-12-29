@@ -19,5 +19,6 @@ export const auth = getAuth()
 export const db = getFirestore(app);
 
 export const dbCollections = {
-  "users": "users"
+  "users": "users",
+  "networks": "networks"
 }

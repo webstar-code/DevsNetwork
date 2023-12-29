@@ -1,7 +1,13 @@
+import { useLocation } from "react-router-dom";
 import { useAppSelector } from "../hooks/useRedux"
 
 export function SiteHeader() {
   const { user } = useAppSelector(state => state.userSlice);
+  const location = useLocation();
+  
+  if (location.pathname.startsWith("/network")) {
+    return null
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background">

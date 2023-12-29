@@ -1,14 +1,20 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
+import {
+  QueryClient,
+  QueryClientProvider
+} from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { SiteHeader } from "./components/site-header";
 import { auth } from "./firebase";
 import { useAppDispatach, useAppSelector } from "./hooks/useRedux";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { MyNetworks } from "./pages/MyNetworks";
+import { Network } from "./pages/Network";
 import { SplashScreen } from "./pages/SplashScreen";
 import { getUserById } from "./reducer/auth";
-import { SiteHeader } from "./components/site-header";
+const queryClient = new QueryClient()
 
 function App() {
   const dispatch = useAppDispatach();
@@ -32,17 +38,20 @@ function App() {
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      <SiteHeader />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/home" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<AuthGuard />}>
-            <Route index element={<MyNetworks />} />
-            <Route path="/my-networks" element={<MyNetworks />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <SiteHeader />
+          <Routes>
+            <Route path="/home" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<AuthGuard />}>
+              <Route index element={<MyNetworks />} />
+              <Route path="/my-networks" element={<MyNetworks />} />
+              <Route path="/network/:id" element={<Network />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
     </div>
   )
 }
