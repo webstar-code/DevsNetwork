@@ -2,7 +2,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { IcAddGroup, IcCheck, IcCopy, IcMail } from "../assets/icons";
-import { db } from "../firebase";
+import { db, dbCollections } from "../firebase";
 import { useAppSelector } from "../hooks/useRedux";
 import { unquieId } from "../utils/utils";
 import Button from "./Button";
@@ -15,21 +15,20 @@ export function Invite() {
   const { network_id } = useParams();
 
   useEffect(() => {
-    const refId = unquieId();
-    const invitation = {
-      id: refId,
-      networkId: network_id,
-      createdBy: user?.id,
-      createdAt: new Date(),
-    }
     if (!refLink) {
-      setDoc(doc(db, "invitations", refId), {
+      const refId = unquieId();
+      const invitation = {
+        id: refId,
+        networkId: network_id,
+        createdBy: user?.id,
+        createdAt: new Date(),
+      }
+      setDoc(doc(db, dbCollections.invitations, refId), {
         ...invitation
       }).then(() => {
         setRefLink(`${window.location.href}?refId=${refId}`)
       })
     }
-
     return () => {
       setCopied(false);
     }
@@ -52,7 +51,7 @@ export function Invite() {
           <h1 className="text-xl font-semibold">Invite People to your network</h1>
           <div className="grid grid-cols-1 grid-rows-4 sm:grid-cols-3 sm:grid-rows-2 gap-y-4 sm:gap-y-6 sm:gap-x-4 my-10">
             <div className="col-span-2 mt-2 sm:mt-0 w-full h-11 py-2 px-4 border border-primary/75 rounded-md">
-              <p className="text-sm whitespace-nowrap overflow-hidden text-ellipsis">{refLink}</p>
+              <input value={refLink} placeholder="Enter Email address" className="w-full text-sm outline-none" />
             </div>
             <Button
               onClick={() => {

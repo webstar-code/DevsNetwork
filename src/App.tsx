@@ -1,9 +1,9 @@
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
 import {
   QueryClient,
   QueryClientProvider
 } from '@tanstack/react-query';
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { SiteHeader } from "./components/site-header";
 import { auth } from "./firebase";
@@ -64,7 +64,8 @@ function App() {
 
 export const AuthGuard = () => {
   const { user } = useAppSelector(state => state.userSlice);
-  if (!user) return <Navigate to="/login" />
+  localStorage.setItem("last-location", window.location.href);
+  if (!user) return <Navigate to="/login" state={{ from: window.location.href }} />
   return <Outlet />
 }
 

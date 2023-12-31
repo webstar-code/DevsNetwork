@@ -45,8 +45,11 @@ export function Login() {
       });
   }, []);
 
-  if (user) return <Navigate to="/" />
-
+  if (user) {
+    const lastLocation = localStorage.getItem("last-location");
+    localStorage.removeItem("last-location");
+    return <Navigate to={lastLocation || "/"} replace />
+  }
   return (
     <div className="w-full min-h-screen bg-primary flex flex-col items-center justify-center gap-10">
       <h1 className='text-secondary text-7xl font-bold'>DEVsNetwork</h1>

@@ -1,14 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Network as VisNetwork } from "vis-network";
 import { networksApi } from "../api/networks";
 import { IcLeft } from '../assets/icons';
 import { Invite } from '../components/Invite';
-import { db, dbCollections } from "../firebase";
+import { auth, db, dbCollections } from "../firebase";
 import { useAppSelector } from '../hooks/useRedux';
 import { INetwork, IUser } from "../interfaces";
+import { authApi } from "../api/auth";
+import { invitationApi } from "../api/invitation";
+import Button from "../components/Button";
+import { PageBlocker } from "../components/PageBlocker";
+import { IcLOADING } from "../assets/animated";
 
 // export function createRandomUser() {
 //   return {
@@ -19,6 +24,7 @@ import { INetwork, IUser } from "../interfaces";
 // export const USERS = faker.helpers.multiple(createRandomUser, {
 //   count: MAX,
 // });
+
 
 export interface IConnectionUser {
   id: string,
@@ -34,10 +40,14 @@ export interface IIConnectionsItem {
 
 export function Network() {
   const { network_id } = useParams();
+  const [searchParams] = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const { user } = useAppSelector(state => state.userSlice);
+  const [invitedBy, setInvitedBy] = useState<IUser | null>(null);
+  const queryClient = useQueryClient()
+
   const navigate = useNavigate();
 
   const getNetworkById = async (id: string) => {
@@ -64,6 +74,14 @@ export function Network() {
         return res.data as IIConnectionsItem[]
       }
     })
+  }
+
+  const onJoinNetwork = async () => {
+    if (!network?.id) return;
+    if (!invitedBy) return;
+    if (!user) return;
+    return await networksApi.addMember(network?.id, invitedBy.id, user)
+      .catch(err => console.error(err));
   }
 
   const { data: network } = useQuery({
@@ -134,6 +152,35 @@ export function Network() {
     }
   }, [connections]);
 
+  useEffect(() => {
+    const refId = searchParams.get("refId")
+    if (refId) {
+      invitationApi.getById(refId).then(async (res) => {
+        if (res.status === "success") {
+          const invitation = res.data;
+          if (invitation.networkId === network_id) {
+            const inviter = await authApi.getUserById(invitation.createdBy).then(res => res.status === "success" ? res.data : null)
+            if (inviter) {
+              setInvitedBy(inviter as IUser);
+            }
+          } else {
+            return;
+          }
+
+        }
+      })
+    }
+  }, [searchParams]);
+
+  const membersUpdate = useMutation({
+    mutationFn: onJoinNetwork,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members_ids'] })
+      queryClient.invalidateQueries({ queryKey: ['members_profiles'] })
+      queryClient.invalidateQueries({ queryKey: ['members_connections'] })
+    },
+  })
+
   // var nodes = USERS.map((u) => ({
   //   id: u.id,
   //   shape: "circularImage",
@@ -193,7 +240,7 @@ export function Network() {
 
   return (
     <div className="w-full min-h-screen relative bg-primary">
-      <div className="absolute top-6 left-20 min-w-[180px] w-max z-50 flex flex-col gap-4">
+      <div className="absolute top-6 left-20 min-w-[180px] w-max z-50 flex flex-col gap-2">
         <div className='border border-secondary/50 rounded-md p-6 py-4 flex bg-primary '>
           <img src={IcLeft} className='w-6 h-6 mr-4 cursor-pointer' onClick={() => navigate(-1)} />
           <div className='flex flex-col gap-2'>
@@ -203,7 +250,30 @@ export function Network() {
         </div>
         <Invite />
       </div>
+
+      {user && invitedBy && !network?.members.includes(user?.id) &&
+        <div className="absolute top-6 right-20 min-w-[180px] w-max z-50 flex flex-col gap-4">
+          <div className='max-w-[380px] border border-secondary/50 rounded-md p-6 py-4 flex flex-col gap-6 bg-primary '>
+            <div className="flex items-start">
+              <img src={invitedBy.photoUrl} className='w-8 h-8 mr-4 cursor-pointer rounded-full object-cover border border-secondary' onClick={() => navigate(-1)} />
+              <div className='flex flex-col gap-2'>
+                <p className="text-sm text-secondary">{invitedBy.name} has invited you to this network</p>
+              </div>
+            </div>
+            <div className="w-full flex gap-4">
+              <Button variant={"outline"} onClick={() => setInvitedBy(null)} className="w-full text-secondary">Reject</Button>
+              <Button variant="secondary" onClick={() => membersUpdate.mutate()} className="w-full">Join</Button>
+            </div>
+          </div>
+        </div>
+      }
+
       <div ref={containerRef} style={{ height: window.screen.availHeight - 100 }} className="w-full min-h-[600px] bg-primary"></div>
+      {membersUpdate.isPending && <PageBlocker open={membersUpdate.isPending}>
+        <div className="flex flex-col gap-6 items-center justify-center">
+          <p>Please wait...</p>
+          <img src={IcLOADING} className="w-10 h-10" />
+        </div></PageBlocker>}
     </div>
   )
 }

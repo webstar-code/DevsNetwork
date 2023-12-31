@@ -20,5 +20,7 @@ export const db = getFirestore(app);
 
 export const dbCollections = {
   "users": "users",
-  "networks": "networks"
+  "networks": "networks",
+  "invitations": "invitations",
+  "connections": "connections"
 }
