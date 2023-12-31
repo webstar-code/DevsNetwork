@@ -1,4 +1,4 @@
-import GITUHB from './gitHub.svg';
+import GITUHB from './github.svg';
 
 export {
   GITUHB
