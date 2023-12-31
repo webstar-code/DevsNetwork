@@ -19,7 +19,7 @@ const create = async (network: INetwork) => {
 
 const get = async (userId: string) => {
   try {
-    const q = query(collection(db, dbCollections.networks), where("createdBy", "==", userId));
+    const q = query(collection(db, dbCollections.networks), where("members", "array-contains", userId));
     const snapshot = await getDocs(q)
     const data = snapshot.docs.map((d) => d.data());
     return SUCCESS_RESPONSE({ status: RESPONSE_STATUS.success, data: data });

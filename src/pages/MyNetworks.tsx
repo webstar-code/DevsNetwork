@@ -26,7 +26,7 @@ export function MyNetworks() {
     <div className="w-full min-h-screen bg-primary">
       <div className="container h-full flex flex-col gap-10 my-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-medium text-secondary">My Networks</h1>
+          <h1 className="text-3xl font-medium text-secondary">Your Networks</h1>
           <AddNetworkModal />
         </div>
 

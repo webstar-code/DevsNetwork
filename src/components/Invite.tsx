@@ -71,7 +71,7 @@ export function Invite() {
                 </div>
               }
             </Button>
-            <div className="col-span-2 mt-2 sm:mt-0 w-full h-11 py-2 px-4 border border-primary/75 rounded-md">
+            {/* <div className="col-span-2 mt-2 sm:mt-0 w-full h-11 py-2 px-4 border border-primary/75 rounded-md">
               <input placeholder="Enter Email address" className="w-full text-sm outline-none" />
             </div>
             <Button size={"lg"} className="w-full shrink-0">
@@ -79,7 +79,7 @@ export function Invite() {
                 <img src={IcMail} className='w-3 h-3' />
                 <p>Send Invite</p>
               </div>
-            </Button>
+            </Button> */}
           </div>
         </div>
         <></>
