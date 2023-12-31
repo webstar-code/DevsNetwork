@@ -41,10 +41,12 @@ export default function Button({
   variant = "primary",
   disabled,
   size,
-  className
+  className,
+  onClick
 }: ButtonProps) {
   return (
     <button
+      onClick={onClick}
       className={cn(buttonVariants({ variant, size, className }))}>
       {children}
     </button>

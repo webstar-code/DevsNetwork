@@ -14,7 +14,13 @@ import { MyNetworks } from "./pages/MyNetworks";
 import { Network } from "./pages/Network";
 import { SplashScreen } from "./pages/SplashScreen";
 import { getUserById } from "./reducer/auth";
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // default: true
+    },
+  },
+})
 
 function App() {
   const dispatch = useAppDispatach();
@@ -47,7 +53,7 @@ function App() {
             <Route path="/" element={<AuthGuard />}>
               <Route index element={<MyNetworks />} />
               <Route path="/my-networks" element={<MyNetworks />} />
-              <Route path="/network/:id" element={<Network />} />
+              <Route path="/network/:network_id" element={<Network />} />
             </Route>
           </Routes>
         </BrowserRouter>

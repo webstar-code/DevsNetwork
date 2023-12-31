@@ -1,14 +1,14 @@
-import { faker } from '@faker-js/faker';
 import { useQuery } from "@tanstack/react-query";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Network as VisNetwork } from "vis-network";
 import { networksApi } from "../api/networks";
-import { db, dbCollections } from "../firebase";
-import { INetwork, IUser } from "../interfaces";
-import { useAppSelector } from '../hooks/useRedux';
 import { IcLeft } from '../assets/icons';
+import { Invite } from '../components/Invite';
+import { db, dbCollections } from "../firebase";
+import { useAppSelector } from '../hooks/useRedux';
+import { INetwork, IUser } from "../interfaces";
 
 // export function createRandomUser() {
 //   return {
@@ -33,8 +33,7 @@ export interface IIConnectionsItem {
 }
 
 export function Network() {
-  const { id } = useParams();
-  const [root, setRoot] = useState<IUser>();
+  const { network_id } = useParams();
   const containerRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -69,15 +68,15 @@ export function Network() {
 
   const { data: network } = useQuery({
     queryKey: ['network'],
-    queryFn: () => getNetworkById(id!),
-    enabled: !!id
+    queryFn: () => getNetworkById(network_id!),
+    enabled: !!network_id
   })
 
   const { data: memberIds } = useQuery({
     queryKey: ['members_ids'],
-    queryFn: () => getNetworkById(id!),
+    queryFn: () => getNetworkById(network_id!),
     select: (n) => n.members.map((m) => m),
-    enabled: !!id
+    enabled: !!network_id
   })
 
   const { data: profiles } = useQuery({
@@ -88,7 +87,7 @@ export function Network() {
 
   const { data: connections } = useQuery({
     queryKey: ['members_connections'],
-    queryFn: () => getNetworkConnections(id!),
+    queryFn: () => getNetworkConnections(network_id!),
     enabled: !!profiles
   })
 
@@ -194,12 +193,15 @@ export function Network() {
 
   return (
     <div className="w-full min-h-screen relative bg-primary">
-      <div className="container absolute top-6 left-20 w-max border border-secondary/50 rounded-md p-6 py-4 flex bg-primary z-50">
-        <img src={IcLeft} className='w-6 h-6 mr-4 cursor-pointer' onClick={() => navigate(-1)} />
-        <div className='flex flex-col gap-2'>
-          <h1 className="text-base font-semibold text-secondary whitespace-nowrap">{network?.name}</h1>
-          <p className="text-sm text-secondary">{network?.members.length} {network?.members.length === 1 ? "Member" : "Members"}</p>
+      <div className="absolute top-6 left-20 min-w-[180px] w-max z-50 flex flex-col gap-4">
+        <div className='border border-secondary/50 rounded-md p-6 py-4 flex bg-primary '>
+          <img src={IcLeft} className='w-6 h-6 mr-4 cursor-pointer' onClick={() => navigate(-1)} />
+          <div className='flex flex-col gap-2'>
+            <h1 className="text-base font-semibold text-secondary whitespace-nowrap">{network?.name}</h1>
+            <p className="text-sm text-secondary">{network?.members.length} {network?.members.length === 1 ? "Member" : "Members"}</p>
+          </div>
         </div>
+        <Invite />
       </div>
       <div ref={containerRef} style={{ height: window.screen.availHeight - 100 }} className="w-full min-h-[600px] bg-primary"></div>
     </div>
