@@ -85,28 +85,24 @@ export function Network() {
   }
 
   const { data: network } = useQuery({
-    queryKey: ['network'],
+    queryKey: ['network', network_id],
     queryFn: () => getNetworkById(network_id!),
-    enabled: !!network_id
   })
 
   const { data: memberIds } = useQuery({
-    queryKey: ['members_ids'],
+    queryKey: ['members_ids', network_id],
     queryFn: () => getNetworkById(network_id!),
     select: (n) => n.members.map((m) => m),
-    enabled: !!network_id
   })
 
   const { data: profiles } = useQuery({
-    queryKey: ['members_profiles'],
+    queryKey: ['members_profiles', memberIds],
     queryFn: () => getMemberProfile(memberIds!),
-    enabled: !!memberIds
   })
 
   const { data: connections } = useQuery({
-    queryKey: ['members_connections'],
+    queryKey: ['members_connections', network_id],
     queryFn: () => getNetworkConnections(network_id!),
-    enabled: !!profiles
   })
 
   useEffect(() => {
@@ -251,7 +247,7 @@ export function Network() {
         <Invite />
       </div>
 
-      {user && invitedBy && !network?.members.includes(user?.id) &&
+      {user && invitedBy && !network?.members.includes(user.id) &&
         <div className="absolute top-6 right-20 min-w-[180px] w-max z-50 flex flex-col gap-4">
           <div className='max-w-[380px] border border-secondary/50 rounded-md p-6 py-4 flex flex-col gap-6 bg-primary '>
             <div className="flex items-start">
