@@ -14,6 +14,8 @@ import { MyNetworks } from "./pages/MyNetworks";
 import { Network } from "./pages/Network";
 import { SplashScreen } from "./pages/SplashScreen";
 import { getUserById } from "./reducer/auth";
+import { injectSpeedInsights } from '@vercel/speed-insights';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -21,6 +23,7 @@ const queryClient = new QueryClient({
     },
   },
 })
+injectSpeedInsights({});
 
 function App() {
   const dispatch = useAppDispatach();
