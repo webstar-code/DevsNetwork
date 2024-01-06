@@ -228,7 +228,7 @@ export function Network() {
       <DotBackground>
         <div className="absolute top-6 left-6 md:left-20 min-w-[180px] w-max z-50 flex flex-col gap-2">
           <div className='border border-secondary/50 rounded-md p-6 py-4 flex bg-primary '>
-            <img src={IcLeft} className='w-6 h-6 mr-4 cursor-pointer' onClick={() => navigate(-1)} />
+            <img src={IcLeft} className='w-6 h-6 mr-4 cursor-pointer' onClick={() => navigate("/networks")} />
             <div className='flex flex-col gap-2'>
               <h1 className="text-base font-semibold text-secondary whitespace-nowrap">{network?.name}</h1>
               <p className="text-sm text-secondary">{network?.members.length} {network?.members.length === 1 ? "Member" : "Members"}</p>

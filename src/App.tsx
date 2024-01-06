@@ -67,7 +67,7 @@ function App() {
 
 export const AuthGuard = () => {
   const { user } = useAppSelector(state => state.userSlice);
-  localStorage.setItem("last-location", window.location.href);
+  localStorage.setItem("last-location", window.location.pathname);
   if (!user) return <Navigate to="/login" state={{ from: window.location.href }} />
   return <Outlet />
 }
