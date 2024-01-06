@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useAppSelector } from "../hooks/useRedux"
+import { Logo } from "../assets";
 
 export function SiteHeader() {
   const { user } = useAppSelector(state => state.userSlice);
@@ -15,7 +16,10 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full bg-background">
       <div className="container flex h-14 items-center justify-between">
-        <h1 className="text-base text-primary-foreground font-semibold">DevsNetwork</h1>
+        <div className="flex items-center gap-2">
+          <img src={Logo} className="w-6 h-6" />
+          <h1 className="text-base text-primary-foreground font-semibold">DevsNetwork</h1>
+        </div>
         {user &&
           <div className="flex gap-10">
             <div className="w-6 h-6 rounded-full overflow-hidden border border-secondary/50">
