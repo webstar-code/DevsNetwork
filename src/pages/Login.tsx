@@ -6,6 +6,7 @@ import { auth } from "../firebase";
 import { useAppDispatach, useAppSelector } from "../hooks/useRedux";
 import { IUser } from "../interfaces";
 import { createUser } from "../reducer/auth";
+import { DotBackground } from "../components/DotBackground";
 
 export function Login() {
   const provider = new GithubAuthProvider();
@@ -51,12 +52,22 @@ export function Login() {
     return <Navigate to={lastLocation || "/"} replace />
   }
   return (
-    <div className="w-full min-h-screen bg-primary flex flex-col items-center justify-center gap-10">
-      <h1 className='text-secondary text-7xl font-bold'>DEVsNetwork</h1>
-      <p className='text-2xl text-secondary'>Login</p>
-      <div onClick={() => login()} className="w-full max-w-[320px] h-10 bg-primary border rounded-md flex items-center justify-center cursor-pointer">
-        <p className="text-base text-primary-foreground mr-2">Login with GitHub</p>
-        <img src={GITUHB} className="w-6 h-5" />
+    <div className="relative w-full min-h-screen bg-primary flex flex-col items-center justify-center gap-10">
+      <h1 className='text-secondary text-5xl md:text-7xl font-bold -mt-20 mb-10  bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600 z-20'>
+        DEVsNetwork</h1>
+      <div className="w-full absolute bottom-0 h-[40rem]">
+        <DotBackground>
+          <></>
+        </DotBackground>
+      </div>
+      <div className="flex flex-col gap-6 items-center z-20">
+        <p className='max-w-sm text-sm md:text-base text-secondary/60 text-center'>
+          Login and become part of the global network and start inviting your peers to the network.</p>
+        <button onClick={() => login()} className="w-full relative  max-w-[300px] h-10 bg-primary border rounded-md flex items-center justify-center cursor-pointer">
+          <p className="text-sm md:text-base text-primary-foreground mr-2">Login with GitHub</p>
+          <img src={GITUHB} className="w-6 h-5" />
+          <span className="absolute inset-x-0 w-4/5 mx-auto -bottom-px bg-gradient-to-r from-transparent via-blue-500 to-transparent h-[2px]" />
+        </button>
       </div>
     </div>
   )

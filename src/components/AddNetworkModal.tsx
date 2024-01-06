@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTrigger } from "../components/Dialog";
 import { useAppSelector } from "../hooks/useRedux";
 import { INetwork } from "../interfaces";
 import { unquieId } from "../utils/utils";
+import { IcLOADING } from "../assets/animated";
 
 export function AddNetworkModal() {
   const [name, setName] = useState("");
@@ -56,7 +57,7 @@ export function AddNetworkModal() {
             />
           </div>
           {loading ?
-            <p>loading....</p>
+            <img src={IcLOADING} className="w-6 h-6" />
             :
             <div className="w-full" onClick={() => onCreate()}>
               <Button className="w-full">

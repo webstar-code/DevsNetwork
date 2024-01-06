@@ -3,28 +3,18 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Network as VisNetwork } from "vis-network";
-import { networksApi } from "../api/networks";
-import { IcLeft } from '../assets/icons';
-import { Invite } from '../components/Invite';
-import { auth, db, dbCollections } from "../firebase";
-import { useAppSelector } from '../hooks/useRedux';
-import { INetwork, IUser } from "../interfaces";
 import { authApi } from "../api/auth";
 import { invitationApi } from "../api/invitation";
-import Button from "../components/Button";
-import { PageBlocker } from "../components/PageBlocker";
+import { networksApi } from "../api/networks";
 import { IcLOADING } from "../assets/animated";
-
-// export function createRandomUser() {
-//   return {
-//     id: faker.string.uuid(), username: faker.internet.userName(), avatar: faker.image.avatar()
-//   };
-// }
-// const MAX = 20;
-// export const USERS = faker.helpers.multiple(createRandomUser, {
-//   count: MAX,
-// });
-
+import { IcLeft } from '../assets/icons';
+import Button from "../components/Button";
+import { Invite } from '../components/Invite';
+import { PageBlocker } from "../components/PageBlocker";
+import { db, dbCollections } from "../firebase";
+import { useAppSelector } from '../hooks/useRedux';
+import { INetwork, IUser } from "../interfaces";
+import { DotBackground } from "../components/DotBackground";
 
 export interface IConnectionUser {
   id: string,
@@ -99,7 +89,6 @@ export function Network() {
     queryKey: ['members_profiles', memberIds],
     queryFn: () => getMemberProfile(memberIds!),
   })
-
   const { data: connections } = useQuery({
     queryKey: ['members_connections', network_id],
     queryFn: () => getNetworkConnections(network_id!),
@@ -236,40 +225,43 @@ export function Network() {
 
   return (
     <div className="w-full min-h-screen relative bg-primary">
-      <div className="absolute top-6 left-20 min-w-[180px] w-max z-50 flex flex-col gap-2">
-        <div className='border border-secondary/50 rounded-md p-6 py-4 flex bg-primary '>
-          <img src={IcLeft} className='w-6 h-6 mr-4 cursor-pointer' onClick={() => navigate(-1)} />
-          <div className='flex flex-col gap-2'>
-            <h1 className="text-base font-semibold text-secondary whitespace-nowrap">{network?.name}</h1>
-            <p className="text-sm text-secondary">{network?.members.length} {network?.members.length === 1 ? "Member" : "Members"}</p>
+      <DotBackground>
+        <div className="absolute top-6 left-6 md:left-20 min-w-[180px] w-max z-50 flex flex-col gap-2">
+          <div className='border border-secondary/50 rounded-md p-6 py-4 flex bg-primary '>
+            <img src={IcLeft} className='w-6 h-6 mr-4 cursor-pointer' onClick={() => navigate(-1)} />
+            <div className='flex flex-col gap-2'>
+              <h1 className="text-base font-semibold text-secondary whitespace-nowrap">{network?.name}</h1>
+              <p className="text-sm text-secondary">{network?.members.length} {network?.members.length === 1 ? "Member" : "Members"}</p>
+            </div>
           </div>
+          {user && network?.members.includes(user?.id) &&
+            <Invite />
+          }
         </div>
-        <Invite />
-      </div>
 
-      {user && invitedBy && !network?.members.includes(user.id) &&
-        <div className="absolute top-6 right-20 min-w-[180px] w-max z-50 flex flex-col gap-4">
-          <div className='max-w-[380px] border border-secondary/50 rounded-md p-6 py-4 flex flex-col gap-6 bg-primary '>
-            <div className="flex items-start">
-              <img src={invitedBy.photoUrl} className='w-8 h-8 mr-4 cursor-pointer rounded-full object-cover border border-secondary' onClick={() => navigate(-1)} />
-              <div className='flex flex-col gap-2'>
-                <p className="text-sm text-secondary">{invitedBy.name} has invited you to this network</p>
+        {user && invitedBy && !network?.members.includes(user?.id) &&
+          <div className="absolute bottom-6 md:top-6 right-6 md:right-20 min-w-[180px] z-50 flex flex-col gap-4">
+            <div className='max-w-[380px] border border-secondary/50 rounded-md p-6 py-4 flex flex-col gap-6 bg-primary '>
+              <div className="flex items-start">
+                <img src={invitedBy.photoUrl} className='w-8 h-8 mr-4 cursor-pointer rounded-full object-cover border border-secondary' onClick={() => navigate(-1)} />
+                <div className='flex flex-col gap-2'>
+                  <p className="text-sm text-secondary">{invitedBy.name} has invited you to this network</p>
+                </div>
+              </div>
+              <div className="w-full flex gap-4">
+                <Button variant={"outline"} onClick={() => setInvitedBy(null)} className="w-full text-secondary">Reject</Button>
+                <Button variant="secondary" onClick={() => membersUpdate.mutate()} className="w-full">Join</Button>
               </div>
             </div>
-            <div className="w-full flex gap-4">
-              <Button variant={"outline"} onClick={() => setInvitedBy(null)} className="w-full text-secondary">Reject</Button>
-              <Button variant="secondary" onClick={() => membersUpdate.mutate()} className="w-full">Join</Button>
-            </div>
           </div>
-        </div>
-      }
-
-      <div ref={containerRef} style={{ height: window.screen.availHeight - 100 }} className="w-full min-h-[600px] bg-primary"></div>
-      {membersUpdate.isPending && <PageBlocker open={membersUpdate.isPending}>
-        <div className="flex flex-col gap-6 items-center justify-center">
-          <p>Please wait...</p>
-          <img src={IcLOADING} className="w-10 h-10" />
-        </div></PageBlocker>}
+        }
+        <div ref={containerRef} style={{ height: window.screen.availHeight - 100 }} className="w-full min-h-[600px]"></div>
+        {membersUpdate.isPending && <PageBlocker open={membersUpdate.isPending}>
+          <div className="flex flex-col gap-6 items-center justify-center">
+            <p>Please wait...</p>
+            <img src={IcLOADING} className="w-10 h-10" />
+          </div></PageBlocker>}
+      </DotBackground>
     </div>
   )
 }

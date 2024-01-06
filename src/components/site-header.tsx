@@ -8,6 +8,9 @@ export function SiteHeader() {
   if (location.pathname.startsWith("/network")) {
     return null
   }
+  if (location.pathname.startsWith("/login")) {
+    return null
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background">
