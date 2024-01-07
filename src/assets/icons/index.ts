@@ -5,6 +5,7 @@ import IcAddGroup from './add_group.svg'
 import IcCopy from './copy.svg';
 import IcMail from './mail.svg'
 import IcCheck from './check.svg';
+import IcLogout from './logout.svg';
 
 export {
   IcCLOSE,
@@ -13,5 +14,6 @@ export {
   IcAddGroup,
   IcCopy,
   IcMail,
-  IcCheck
+  IcCheck,
+  IcLogout
 }
