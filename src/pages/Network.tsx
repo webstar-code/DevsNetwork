@@ -1,20 +1,20 @@
+import Graphin, { Behaviors, GraphinData, GraphinTreeData, IUserEdge, IUserNode } from "@antv/graphin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Network as VisNetwork } from "vis-network";
 import { authApi } from "../api/auth";
 import { invitationApi } from "../api/invitation";
 import { networksApi } from "../api/networks";
 import { IcLOADING } from "../assets/animated";
 import { IcLeft } from '../assets/icons';
 import Button from "../components/Button";
+import { DotBackground } from "../components/DotBackground";
 import { Invite } from '../components/Invite';
 import { PageBlocker } from "../components/PageBlocker";
 import { db, dbCollections } from "../firebase";
 import { useAppSelector } from '../hooks/useRedux';
 import { INetwork, IUser } from "../interfaces";
-import { DotBackground } from "../components/DotBackground";
 
 export interface IConnectionUser {
   id: string,
@@ -28,12 +28,14 @@ export interface IIConnectionsItem {
   root?: boolean
 }
 
+const { DragCanvas, ZoomCanvas, DragNode, ActivateRelations } = Behaviors
 export function Network() {
   const { network_id } = useParams();
   const [searchParams] = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+  const [nodes, setNodes] = useState<IUserNode[]>([]);
+  const [edges, setEdges] = useState<IUserEdge[]>([]);
+  const [data, setData] = useState<GraphinTreeData | GraphinData>();
   const { user } = useAppSelector(state => state.userSlice);
   const [invitedBy, setInvitedBy] = useState<IUser | null>(null);
   const queryClient = useQueryClient()
@@ -96,22 +98,29 @@ export function Network() {
 
   useEffect(() => {
     if (profiles && profiles.length > 0) {
-      let n = [];
+      let n: IUserNode[] = [];
       for (const p of profiles) {
         if (!p) continue;
         n.push({
           id: p?.id,
-          shape: "circularImage",
-          image: p?.photoUrl,
-          label: p?.name,
-          color: {
-            background: "cyan",
-            border: "#EEF0EF",
-            highlight: { background: "#EEF0EF", border: "#10FF87" },
-            hover: { background: "#EEF0EF", border: "#97FFCB" },
-          },
-          choosen: user?.id === p.id ? true : false,
-          size: user?.id === p.id ? 28 : 20,
+          style: {
+            keyshape: {
+              size: 40,
+              stroke: "white",
+              fill: "white"
+            },
+            icon: {
+              type: 'image',
+              value: p.photoUrl,
+              size: 40,
+              clip: {
+                r: 20,
+              },
+            },
+            label: {
+              value: p.name
+            },
+          }
         })
       }
       setNodes(n as any);
@@ -120,16 +129,12 @@ export function Network() {
 
   useEffect(() => {
     if (connections) {
-      let e = [];
+      let e: IUserEdge[] = [];
       for (const c of connections) {
         if (c.edges.length > 0) {
           e.push(...c.edges.map(e => ({
-            from: c.node,
-            to: e,
-            arrows: { to: { enabled: true, type: "triangle" } },
-            color: {
-              color: "#7D7D7D", highlight: "#10FF87",
-            }
+            source: c.node,
+            target: e,
           })))
         }
       }
@@ -167,31 +172,6 @@ export function Network() {
     },
   })
 
-  // var nodes = USERS.map((u) => ({
-  //   id: u.id,
-  //   shape: "circularImage",
-  //   image: u.avatar, label: u.username,
-  //   color: {
-  //     background: "cyan",
-  //     border: "#EEF0EF",
-  //     highlight: { background: "#EEF0EF", border: "#10FF87" },
-  //     hover: { background: "#EEF0EF", border: "#97FFCB" },
-  //   },
-  //   choosen: root?.id === u.id ? true : false,
-  //   size: root?.id === u.id ? 32 : 20,
-  // }))
-  // var edges = USERS.map(() => ({
-  //   from: nodes[ran(MAX - 1)].id,
-  //   to: nodes[ran(MAX - 1)].id,
-  //   arrows: { to: { enabled: true, type: "triangle" } },
-  //   color: {
-  //     color: "#7D7D7D", highlight: "#10FF87",
-
-  //   }
-  // }
-  // ))
-
-
   var options = {
     nodes: {
       shape: "dot",
@@ -208,24 +188,22 @@ export function Network() {
     },
     interaction: { hover: true },
   };
-
-  function changeCursor(newCursorStyle: string) {
-    if (containerRef.current)
-      containerRef.current.getElementsByTagName("canvas")[0].style.cursor = newCursorStyle;
-  }
-
   useEffect(() => {
-    if (containerRef.current && nodes && nodes !== undefined && edges) {
-      // @ts-ignore
-      var network = new VisNetwork(containerRef.current, { nodes, edges }, options);
-      network.on("hoverNode", function () {
-        changeCursor("grab");
-      });
+    if (nodes && nodes !== undefined && edges) {
+      if (nodes.length > 0 && edges.length > 0) {
+        setData({ nodes, edges })
+      }
     }
-  }, [nodes, edges, containerRef.current]);
+  }, [nodes, edges]);
 
+  const layout = {
+    type: 'graphin-force',
+    presets: {
+      type: 'concentric',
+    }
+  };
   return (
-    <div className="w-full min-h-screen relative bg-primary">
+    <div className="w-full h-full min-h-screen relative bg-primary overflow-hidden">
       <DotBackground>
         <div className="absolute top-6 left-6 md:left-20 min-w-[180px] w-max z-50 flex flex-col gap-2">
           <div className='border border-secondary/50 rounded-md p-6 py-4 flex bg-primary '>
@@ -256,7 +234,19 @@ export function Network() {
             </div>
           </div>
         }
-        <div ref={containerRef} style={{ height: window.screen.availHeight - 100 }} className="w-full min-h-[600px]"></div>
+        {data &&
+          <div className="w-full h-full min-h-screen flex items-stretch justify-center overflow-hidden">
+            <Graphin data={data}
+              layout={layout}
+              style={{ width: "100%", height: "100%", minHeight: 800 }}
+              theme={{ mode: 'dark', primaryColor: '#EEF0EF', background: "#fff0" }}>
+              <ZoomCanvas enableOptimize />
+              <DragNode />
+              <ActivateRelations trigger="click" />
+              <DragCanvas />
+            </Graphin>
+          </div>
+        }
         {membersUpdate.isPending && <PageBlocker open={membersUpdate.isPending}>
           <div className="max-w-sm flex flex-col gap-6 items-center justify-center">
             <p>Please wait...</p>
