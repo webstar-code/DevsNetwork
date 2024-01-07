@@ -15,7 +15,8 @@ import { Network } from "./pages/Network";
 import { SplashScreen } from "./pages/SplashScreen";
 import { getUserById } from "./reducer/auth";
 import { injectSpeedInsights } from '@vercel/speed-insights';
-
+import { inject } from '@vercel/analytics';
+ 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -24,7 +25,7 @@ const queryClient = new QueryClient({
   },
 })
 injectSpeedInsights({});
-
+inject();
 function App() {
   const dispatch = useAppDispatach();
   const [loading, setLoading] = useState(true);
