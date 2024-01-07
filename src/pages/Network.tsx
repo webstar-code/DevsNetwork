@@ -160,6 +160,7 @@ export function Network() {
   const membersUpdate = useMutation({
     mutationFn: onJoinNetwork,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['network'] })
       queryClient.invalidateQueries({ queryKey: ['members_ids'] })
       queryClient.invalidateQueries({ queryKey: ['members_profiles'] })
       queryClient.invalidateQueries({ queryKey: ['members_connections'] })
@@ -240,7 +241,7 @@ export function Network() {
         </div>
 
         {user && invitedBy && !network?.members.includes(user?.id) &&
-          <div className="absolute bottom-6 md:top-6 right-6 md:right-20 min-w-[180px] z-50 flex flex-col gap-4">
+          <div className="absolute bottom-10 md:top-6 right-6 md:right-20 min-w-[180px] z-50 flex flex-col gap-4">
             <div className='max-w-[380px] border border-secondary/50 rounded-md p-6 py-4 flex flex-col gap-6 bg-primary '>
               <div className="flex items-start">
                 <img src={invitedBy.photoUrl} className='w-8 h-8 mr-4 cursor-pointer rounded-full object-cover border border-secondary' onClick={() => navigate(-1)} />
@@ -257,7 +258,7 @@ export function Network() {
         }
         <div ref={containerRef} style={{ height: window.screen.availHeight - 100 }} className="w-full min-h-[600px]"></div>
         {membersUpdate.isPending && <PageBlocker open={membersUpdate.isPending}>
-          <div className="flex flex-col gap-6 items-center justify-center">
+          <div className="max-w-sm flex flex-col gap-6 items-center justify-center">
             <p>Please wait...</p>
             <img src={IcLOADING} className="w-10 h-10" />
           </div></PageBlocker>}
