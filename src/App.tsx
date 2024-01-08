@@ -16,7 +16,7 @@ import { SplashScreen } from "./pages/SplashScreen";
 import { getUserById } from "./reducer/auth";
 import { injectSpeedInsights } from '@vercel/speed-insights';
 import { inject } from '@vercel/analytics';
- 
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -68,7 +68,7 @@ function App() {
 
 export const AuthGuard = () => {
   const { user } = useAppSelector(state => state.userSlice);
-  localStorage.setItem("last-location", window.location.pathname);
+  localStorage.setItem("last-location", window.location.pathname + window.location.search);
   if (!user) return <Navigate to="/login" state={{ from: window.location.href }} />
   return <Outlet />
 }
